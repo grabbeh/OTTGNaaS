@@ -1,0 +1,24 @@
+{
+  "name": "ottgnaas",
+  "version": "0.0.1",
+  "description": "Online terms as a graphic novel",
+  "main": "index.js",
+  "dependencies": {
+    "canvas": "^1.6.5",
+    "express": "^4.15.3",
+    "fabric": "1.7.12",
+    "underscore": "1.8.3"
+  },
+  "devDependencies": {},
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/grabbeh/OTTGNaaS.git"
+  },
+  "author": "grabbeh",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/grabbeh/OTTGNaaS/issues"
+  },
+  "homepage": "https://github.com/grabbeh/OTTGNaaS#readme"
+}

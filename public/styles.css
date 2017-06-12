@@ -1,0 +1,14 @@
+#container {
+position: relative;
+}
+#container canvas, #overlay {
+position: absolute;
+}
+
+#overlay {
+background-image: url("novel.jpg")
+}
+
+.image {
+  background-image: url("novel.jpg")
+}
