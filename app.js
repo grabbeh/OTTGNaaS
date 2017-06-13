@@ -139,18 +139,26 @@ function enlargeArea(a, increasePercentage){
 }
 
 function groupBoxes(){
-	var i = 1
-  var obj = {}
-  var arr = []
+  let i = 1
+  let obj = {}
+  let arr = []
   canvas.forEachObject(function(obj) {
     canvas.forEachObject(function(objTwo) {
-      if (obj.intersectsWithObject(objTwo) && arr.indexOf(obj.id) === -1 || arr.indexOf(objTwo.id){
-		    obj.bucketId = i
-	      arr.push(obj.id)
+      if (obj.intersectsWithObject(objTwo)){
+	// If there is intersection and compared object has bucket ID already then give bucketId to new object      
+	if (objTwo.bucketId) {
+	      obj.bucketId = objTwo.bucketId    
+        }
+	// if no existing bucketID then give new object new ID
+	else {
+		obj.bucketId = i	
+	}
+	arr.push(obj.id)
       }
+	// if no intersection then increment counter as new bucket required    
       else {
         i++
       }
     })    
-  });
+  })
 }
