@@ -149,15 +149,17 @@ function groupBoxes(){
 	if (objTwo.bucketId) {
 	      obj.bucketId = objTwo.bucketId    
         }
-	// if no existing bucketID then give new object new ID
+	// if no existing bucketID then give new object new ID and increment counter
 	else {
-		obj.bucketId = i	
+		obj.bucketId = i
+		i++
 	}
 	arr.push(obj.id)
       }
-	// if no intersection then increment counter as new bucket required    
+	// if no intersection then give new ID and increment counter as new bucket required    
       else {
-        i++
+        obj.bucketId = i
+	i++
       }
     })    
   })
