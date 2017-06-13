@@ -138,3 +138,19 @@ function enlargeArea(a, increasePercentage){
   return a
 }
 
+function groupBoxes(){
+	var i = 1
+  var obj = {}
+  var arr = []
+  canvas.forEachObject(function(obj) {
+    canvas.forEachObject(function(objTwo) {
+      if (obj.intersectsWithObject(objTwo) && arr.indexOf(obj.id) === -1 || arr.indexOf(objTwo.id){
+		    obj.bucketId = i
+	      arr.push(obj.id)
+      }
+      else {
+        i++
+      }
+    })    
+  });
+}
