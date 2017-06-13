@@ -127,3 +127,12 @@ function intersect (a, b) {
     b.top <= a.bottom
   )
 }
+
+function enlargeArea(a, increasePercentage){
+  const multiplier = (increasePercentage / 100) + 1
+  for (let coord of a) {
+    coord.x = coord.x * multiplier
+  }
+  return a
+}
+
