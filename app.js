@@ -7,7 +7,9 @@ const annotations = data.textAnnotations
 const polys = annotations.map(a => {
   return {
     coords: a.boundingPoly.vertices,
-    area: null
+    area: null, 
+    id: null,
+    bucketId: null
   }
 })
 
