@@ -69,8 +69,8 @@ const canvas = fabric.createCanvasForNode(1000, 1000, {})
 filteredBoxes.forEach(a => {
   let poly = new fabric.Polygon(a.coords, {
     stroke: 'black',
-    left: a.coords[3].x,
-    top: a.coords[3].y
+    left: a.coords[0].x,
+    top: a.coords[0].y
   })
   canvas.add(poly)
 })
@@ -78,8 +78,8 @@ filteredBoxes.forEach(a => {
 enlargedBoxes.forEach(a => {
   let poly = new fabric.Polygon(a.enlargedCoords, {
     stroke: 'white',
-    left: a.coords[0].x,
-    top: a.coords[0].y
+    left: a.enlargedCoords[0].x,
+    top: a.enlargedCoords[0].y
   })
   canvas.add(poly)
 })
