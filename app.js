@@ -2,28 +2,97 @@ const express = require('express')
 const app = express()
 const path = require('path')
 const _ = require('underscore')
+const __ = require('lodash')
+const fabric = require('fabric').fabric
+const Jimp = require('jimp')
 const data = require('./public/results.json')
 const annotations = data.textAnnotations
 const polys = annotations.map(a => {
   return {
     coords: a.boundingPoly.vertices,
-    area: null, 
+    area: null,
     id: null,
     bucketId: null
   }
 })
+const fs = require('fs')
+const out = fs.createWriteStream(__dirname + '/helloworld.png')
+
+/*
+Jimp.read('./public/novel.jpg')
+  .then(function (jpg) {
+    const w = jpg.bitmap.width
+    const h = jpg.bitmap.height
+    const canvas = fabric.createCanvasForNode(w, h)
+  })
+  .catch(function (err) {
+    console.error(err)
+  })
+*/
 
 let clean = cleanPolys(polys)
 let high = getHighestCoords(clean)
 let coordsOfHighest = createCoords(high)
 let largestArea = calculateArea(coordsOfHighest)
 let areas = addArea(clean)
-let filteredAreas = areas.filter(a => {
+let filteredBoxes = areas.filter(a => {
   let acceptableArea = largestArea / 1
   return a.area < acceptableArea
 })
+let boxes = _.pluck(filteredBoxes, 'coords')
 
-let coords = _.pluck(filteredAreas, 'coords')
+let enlargedBoxes = filteredBoxes.map(a => {
+  a.enlargedCoords = increaseArea(__.cloneDeep(a.coords), 50)
+  return a
+})
+
+/*
+let one = filteredBoxes.slice(0, 1)
+
+one.map(a => {
+  console.log(a.coords)
+  const clone = __.cloneDeep(a.coords)
+  // console.log(increaseArea(a.coords, 20))
+  let newArea = increaseArea(clone, 20)
+  // console.log(newArea)
+  a.newArea = newArea
+  console.log(a)
+})
+*/
+
+// console.log(filteredBoxes[0].coords)
+// console.log(enlargedBoxes[0].enlargedCoords)
+// console.log(increaseArea(filteredBoxes[0].coords, 20))
+
+const canvas = fabric.createCanvasForNode(1000, 1000, {})
+
+filteredBoxes.forEach(a => {
+  let poly = new fabric.Polygon(a.coords, {
+    stroke: 'black',
+    left: a.coords[3].x,
+    top: a.coords[3].y
+  })
+  canvas.add(poly)
+})
+
+enlargedBoxes.forEach(a => {
+  let poly = new fabric.Polygon(a.enlargedCoords, {
+    stroke: 'white',
+    left: a.coords[0].x,
+    top: a.coords[0].y
+  })
+  canvas.add(poly)
+})
+
+var stream = canvas.createPNGStream()
+stream.on('data', function (chunk) {
+  out.write(chunk)
+})
+
+fabric.Image.fromURL('./public/novel.jpg', function (oImg) {
+  canvas.add(oImg)
+})
+
 app.use(express.static('public'))
 
 app.get('/', function (req, res) {
@@ -31,7 +100,7 @@ app.get('/', function (req, res) {
 })
 
 app.get('/data', function (req, res) {
-  res.send(coords)
+  res.send(boxes)
 })
 
 app.listen(2000)
@@ -112,55 +181,38 @@ function addArea (arr) {
   return arr
 }
 
-function intersect (a, b) {
-  return (
-    a.left <= b.right &&
-    b.left <= a.right &&
-    a.top <= b.bottom &&
-    b.top <= a.bottom
-  )
-}
-
-function intersect (a, b) {
-  return (
-    a.left <= b.right &&
-    b.left <= a.right &&
-    a.top <= b.bottom &&
-    b.top <= a.bottom
-  )
-}
-
-function enlargeArea(a, increasePercentage){
-  const multiplier = (increasePercentage / 100) + 1
+function increaseArea (a, increasePercentage) {
+  const multiplier = increasePercentage / 100 + 1
   for (let coord of a) {
     coord.x = coord.x * multiplier
+    coord.y = coord.y * multiplier
   }
   return a
 }
 
-function groupBoxes(){
+function groupBoxes () {
   let i = 1
-  let obj = {}
   let arr = []
-  canvas.forEachObject(function(obj) {
-    canvas.forEachObject(function(objTwo) {
-      if (obj.intersectsWithObject(objTwo)){
-	// If there is intersection and compared object has bucket ID already then give bucketId to new object      
-	if (objTwo.bucketId) {
-	      obj.bucketId = objTwo.bucketId    
+  canvas.forEachObject(function (obj) {
+    canvas.forEachObject(function (objTwo) {
+      if (obj.intersectsWithObject(objTwo)) {
+        console.log('INTERSECTION')
+        // If there is intersection and compared object has bucket ID already then give bucketId to new object
+        if (objTwo.bucketId) {
+          obj.bucketId = objTwo.bucketId
+        } else {
+          // if no existing bucketID then give new object new ID and increment counter
+          obj.bucketId = i
+          i++
         }
-	// if no existing bucketID then give new object new ID and increment counter
-	else {
-		obj.bucketId = i
-		i++
-	}
-	arr.push(obj.id)
-      }
-	// if no intersection then give new ID and increment counter as new bucket required    
-      else {
+        arr.push(obj.id)
+      } else {
+        // if no intersection then give new ID and increment counter as new bucket required
         obj.bucketId = i
-	i++
+        i++
       }
-    })    
+    })
   })
 }
+
+groupBoxes()
