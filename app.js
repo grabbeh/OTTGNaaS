@@ -70,7 +70,10 @@ filteredBoxes.forEach(a => {
   let poly = new fabric.Polygon(a.coords, {
     stroke: 'black',
     left: a.coords[0].x,
-    top: a.coords[0].y
+    top: a.coords[0].y,
+    stroke: 'black',
+    strokeWidth: 10,
+    fill: 'rgba(0,0,0,0)'
   })
   canvas.add(poly)
 })
@@ -79,7 +82,10 @@ enlargedBoxes.forEach(a => {
   let poly = new fabric.Polygon(a.enlargedCoords, {
     stroke: 'white',
     left: a.enlargedCoords[0].x,
-    top: a.enlargedCoords[0].y
+    top: a.enlargedCoords[0].y,
+    stroke: 'black',
+    strokeWidth: 10,
+    fill: 'rgba(0,0,0,0)'
   })
   canvas.add(poly)
 })
