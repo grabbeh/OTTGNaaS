@@ -188,10 +188,10 @@ function increaseArea (a, increasePercentage) {
   a[0].y = a[0].y * negativeMultiplier
   a[3].x = a[3].x * negativeMultiplier
   a[3].y = a[3].y * negativeMultiplier
-  a[1].x = a[3].x * positiveMultiplier
-  a[1].y = a[3].y * positiveMultiplier
-  a[2].x = a[3].x * positiveMultiplier
-  a[2].y = a[3].y * positiveMultiplier
+  a[1].x = a[1].x * positiveMultiplier
+  a[1].y = a[1].y * positiveMultiplier
+  a[2].x = a[2].x * positiveMultiplier
+  a[2].y = a[2].y * positiveMultiplier
   return a
   /*for (let coord of a) {
     coord.x = coord.x * multiplier
