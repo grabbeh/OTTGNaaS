@@ -1,10 +1,19 @@
-const express = require('express')
-const app = express()
+// const express = require('express')
+// const app = express()
 const path = require('path')
 const _ = require('underscore')
 const __ = require('lodash')
 const fabric = require('fabric').fabric
 const Jimp = require('jimp')
+const canvas = fabric.createCanvasForNode(1000, 1000, {})
+const canvasTwo = fabric.createCanvasForNode(1000, 1000, {})
+/*
+var komika = new canvasTwo.Font(
+  'Komika',
+  path.join(__dirname, '/public/KOMIKAX_.ttf')
+)
+canvasTwo.contextContainer.addFont(komika) */
+const fs = require('fs')
 const data = require('./public/results.json')
 const annotations = data.textAnnotations
 const polys = annotations.map(a => {
@@ -12,11 +21,12 @@ const polys = annotations.map(a => {
     coords: a.boundingPoly.vertices,
     area: null,
     id: null,
-    bucketId: null
+    groupId: null
   }
 })
-const fs = require('fs')
-const out = fs.createWriteStream(__dirname + '/helloworld.png')
+polys.forEach((p, i) => {
+  p.id = i
+})
 
 /*
 Jimp.read('./public/novel.jpg')
@@ -30,6 +40,20 @@ Jimp.read('./public/novel.jpg')
   })
 */
 
+const out = fs.createWriteStream(path.join(__dirname, '/output/poly.png'))
+
+let stream = canvas.createPNGStream()
+stream.on('data', function (chunk) {
+  out.write(chunk)
+})
+
+const groupOut = fs.createWriteStream(path.join(__dirname, '/output/group.png'))
+
+let groupStream = canvasTwo.createPNGStream()
+groupStream.on('data', function (chunk) {
+  groupOut.write(chunk)
+})
+
 let clean = cleanPolys(polys)
 let high = getHighestCoords(clean)
 let coordsOfHighest = createCoords(high)
@@ -39,66 +63,48 @@ let filteredBoxes = areas.filter(a => {
   let acceptableArea = largestArea / 1
   return a.area < acceptableArea
 })
-let boxes = _.pluck(filteredBoxes, 'coords')
 
 let enlargedBoxes = filteredBoxes.map(a => {
-  a.enlargedCoords = increaseArea(__.cloneDeep(a.coords), 50)
+  a.enlargedCoords = increaseArea(__.cloneDeep(a.coords), 5, 7.5)
   return a
 })
 
+renderBoxes(enlargedBoxes)
+testIntersection(canvas)
+let ids = extractGroupIds(canvas)
+let boxesWithGroupId = addGroupIds(ids, enlargedBoxes)
+let canvasBucket = addPolysToCanvas(boxesWithGroupId)
+let groupedPolys = groupPolys(canvasBucket)
+let filteredBucket = filterBucket(groupedPolys, 2)
+addGroupsToCanvas(canvasTwo, filteredBucket)
+
+// render normal and larger boxes to canvas to show difference
+
+function renderBoxes (arr) {
+  arr.forEach(a => {
+    let largePoly = new fabric.Polygon(a.enlargedCoords, {
+      left: a.enlargedCoords[0].x,
+      top: a.enlargedCoords[0].y,
+      stroke: 'white',
+      strokeWidth: 1,
+      fill: 'rgba(0,0,0,0)',
+      id: a.id
+    })
+
+    let poly = new fabric.Polygon(a.coords, {
+      left: a.coords[0].x,
+      top: a.coords[0].y,
+      stroke: 'red',
+      strokeWidth: 1,
+      fill: 'rgba(0,0,0,0)',
+      id: a.id
+    })
+    canvas.add(poly)
+    canvas.add(largePoly)
+  })
+}
+
 /*
-let one = filteredBoxes.slice(0, 1)
-
-one.map(a => {
-  console.log(a.coords)
-  const clone = __.cloneDeep(a.coords)
-  // console.log(increaseArea(a.coords, 20))
-  let newArea = increaseArea(clone, 20)
-  // console.log(newArea)
-  a.newArea = newArea
-  console.log(a)
-})
-*/
-
-// console.log(filteredBoxes[0].coords)
-// console.log(enlargedBoxes[0].enlargedCoords)
-// console.log(increaseArea(filteredBoxes[0].coords, 20))
-
-const canvas = fabric.createCanvasForNode(1000, 1000, {})
-
-filteredBoxes.forEach(a => {
-  let poly = new fabric.Polygon(a.coords, {
-    stroke: 'black',
-    left: a.coords[0].x,
-    top: a.coords[0].y,
-    stroke: 'black',
-    strokeWidth: 10,
-    fill: 'rgba(0,0,0,0)'
-  })
-  canvas.add(poly)
-})
-
-enlargedBoxes.forEach(a => {
-  let poly = new fabric.Polygon(a.enlargedCoords, {
-    stroke: 'white',
-    left: a.enlargedCoords[0].x,
-    top: a.enlargedCoords[0].y,
-    stroke: 'black',
-    strokeWidth: 10,
-    fill: 'rgba(0,0,0,0)'
-  })
-  canvas.add(poly)
-})
-
-var stream = canvas.createPNGStream()
-stream.on('data', function (chunk) {
-  out.write(chunk)
-})
-
-fabric.Image.fromURL('./public/novel.jpg', function (oImg) {
-  canvas.add(oImg)
-})
-
 app.use(express.static('public'))
 
 app.get('/', function (req, res) {
@@ -110,6 +116,7 @@ app.get('/data', function (req, res) {
 })
 
 app.listen(2000)
+*/
 
 function calculateArea (arr) {
   let lowX = null
@@ -140,6 +147,8 @@ function calculateArea (arr) {
   return area
 }
 
+// add coordinates if none were added (don't think coords added if 0 for example)
+
 function cleanPolys (arr) {
   for (let box of arr) {
     for (let coord of box.coords) {
@@ -154,9 +163,13 @@ function cleanPolys (arr) {
   return arr
 }
 
+// get highest coords so can discard any excessively large areas
+
 function getHighestCoords (arr) {
   let highestX = 0
   let highestY = 0
+  let lowestY = null
+  let lowestX = null
   var o = { highestX, highestY }
   for (let box of arr) {
     for (let coord of box.coords) {
@@ -166,10 +179,18 @@ function getHighestCoords (arr) {
       if (coord.y > highestY) {
         o.highestY = coord.y
       }
+      if (coord.y < lowestY) {
+        o.lowestY = coord.y
+      }
+      if (coord.x < lowestX) {
+        o.lowestX = coord.x
+      }
     }
   }
   return o
 }
+
+// create coordinates from highest/lowest check above
 
 function createCoords (o) {
   let arr = []
@@ -187,48 +208,168 @@ function addArea (arr) {
   return arr
 }
 
-function increaseArea (a, increasePercentage) {
-  const positiveMultiplier = increasePercentage / 100 + 1
-  const negativeMultiplier = 1 - increasePercentage / 100
-  a[0].x = a[0].x * negativeMultiplier
-  a[0].y = a[0].y * negativeMultiplier
-  a[3].x = a[3].x * negativeMultiplier
-  a[3].y = a[3].y * positiveMultiplier
-  a[1].x = a[1].x * positiveMultiplier
-  a[1].y = a[1].y * negativeMultiplier
-  a[2].x = a[2].x * positiveMultiplier
-  a[2].y = a[2].y * positiveMultiplier
-  return a
-  /*for (let coord of a) {
-    coord.x = coord.x * multiplier
-    coord.y = coord.y * multiplier
-  }*/
-  return a
+// increase area of text box to enable intersection check
+
+function increaseArea (a, xInc, yInc) {
+  let c = __.cloneDeep(a)
+  c[0].x = c[0].x - xInc
+  c[0].y = c[0].y - yInc
+  c[3].x = c[3].x - xInc
+  c[3].y = c[3].y + yInc
+  c[1].x = c[1].x + xInc
+  c[1].y = c[1].y - yInc
+  c[2].x = c[2].x + xInc
+  c[2].y = c[2].y + yInc
+  return c
 }
 
-function groupBoxes () {
+// test intersection to give a groupId
+
+function testIntersection (canvas) {
   let i = 1
-  let arr = []
-  canvas.forEachObject(function (obj) {
-    canvas.forEachObject(function (objTwo) {
-      if (obj.intersectsWithObject(objTwo)) {
-        console.log('INTERSECTION')
-        // If there is intersection and compared object has bucket ID already then give bucketId to new object
-        if (objTwo.bucketId) {
-          obj.bucketId = objTwo.bucketId
-        } else {
-          // if no existing bucketID then give new object new ID and increment counter
-          obj.bucketId = i
-          i++
+  canvas.forEachObject(function (polyOne) {
+    canvas.forEachObject(function (polyTwo) {
+      if (polyOne.intersectsWithObject(polyTwo)) {
+        // if polyOne has no existing group but two does, give polyOne, two’s ID
+        if (!polyOne.groupId && polyTwo.groupId) {
+          polyOne.groupId = polyTwo.groupId
         }
-        arr.push(obj.id)
-      } else {
-        // if no intersection then give new ID and increment counter as new bucket required
-        obj.bucketId = i
-        i++
+        // reverse
+        if (polyOne.groupId && !polyTwo.groupId) {
+          polyTwo.groupId = polyOne.groupId
+        }
+        // if neither poly has an id but they intersect, then need to create new group
+        if (!polyOne.groupId && !polyTwo.groupId) {
+          i++
+          polyOne.groupId = i
+          polyTwo.groupId = i
+        }
+        if (polyOne.groupId && polyTwo.groupId) {
+          if (polyOne.groupId < polyTwo.groupId) {
+            polyTwo.groupId = polyOne.groupId
+          }
+          if (polyTwo.groupId < polyOne.groupId) {
+            polyOne.groupId = polyTwo.groupId
+          }
+        }
       }
     })
   })
 }
 
-groupBoxes()
+// convert canvas to object to allow extraction of group Ids
+
+function extractGroupIds (canvas) {
+  const canv = canvas.toObject(['groupId', 'id'])
+  let ids = canv.objects.map(o => {
+    return {
+      id: o.id,
+      groupId: o.groupId
+    }
+  })
+  return ids
+}
+
+// add newly discovered groupId to original array
+
+function addGroupIds (ids, arr) {
+  arr.forEach(a => {
+    ids.forEach(b => {
+      if (b.id === a.id) {
+        a.groupId = b.groupId
+      }
+    })
+  })
+  return arr
+}
+
+// create polys to enable grouping
+
+function addPolysToCanvas (arr) {
+  let polyBucket = []
+  arr.forEach(a => {
+    let poly = new fabric.Polygon(a.coords, {
+      left: a.coords[0].x,
+      top: a.coords[0].y,
+      stroke: 'red',
+      strokeWidth: 1,
+      fill: 'rgba(0,0,0,0)',
+      id: a.id,
+      groupId: a.groupId
+    })
+    polyBucket.push(poly)
+  })
+  return polyBucket
+}
+
+// group polys to create separate arrays per group to allow creation of groups
+
+function groupPolys (polys) {
+  let groupedPolygons = _.groupBy(polys, 'groupId')
+  let target = _.pairs(groupedPolygons)
+
+  let groupedPolys = target.map(t => {
+    return t[1]
+  })
+  return groupedPolys
+}
+
+// filter groups down on basis that if only X polys, unlikely to be text box (on basis that poly is usually 1 word)
+
+function filterBucket (arr, y) {
+  let filteredArray = []
+  arr.forEach(n => {
+    if (n.length > y) filteredArray.push(n)
+  })
+  return filteredArray
+}
+
+// create groups and extract coords of group and create polys from them
+
+function addGroupsToCanvas (canvas, arr) {
+  arr.forEach(g => {
+    let groupId = g[0].groupId
+    let group = new fabric.Group(g, {
+      groupId: groupId
+    })
+    let co = group.aCoords
+    let poly = new fabric.Polygon(
+      [
+        { x: co.tl.x, y: co.tl.y },
+        { x: co.tr.x, y: co.tr.y },
+        { x: co.br.x, y: co.br.y },
+        { x: co.bl.x, y: co.bl.y }
+      ],
+      {
+        left: co.tl.x,
+        top: co.tl.y,
+        // fill: 'rgba(0,0,0,0)',
+        fill: 'white',
+        groupId: groupId
+      }
+    )
+    let num = groupId.toString()
+    let text = new fabric.Text(num, {
+      left: co.tl.x + 5,
+      top: co.tl.y + 5,
+      stroke: 'black',
+      fontFamily: 'Arial',
+      fontSize: 15
+    })
+
+    canvas.add(poly)
+    canvas.add(text)
+  })
+}
+/*
+const newCanv = canvasTwo.toObject(['groupId', 'id'])
+fs.writeFile('grouped.json', JSON.stringify(newCanv.objects))
+
+let groups = newCanv.objects.map(o => {
+  return {
+    id: o.id,
+    groupId: o.id,
+    coords: o.points
+  }
+})
+*/
