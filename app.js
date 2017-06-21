@@ -3,10 +3,20 @@
 const path = require('path')
 const _ = require('underscore')
 const __ = require('lodash')
+const concaveman = require('concaveman')
+const ch = require('convex-hull')
 const fabric = require('fabric').fabric
 const Jimp = require('jimp')
-const canvas = fabric.createCanvasForNode(1000, 1000, {})
-const canvasTwo = fabric.createCanvasForNode(1000, 1000, {})
+const canvas = fabric.createCanvasForNode(690, 984, {})
+canvas.setBackgroundColor(
+  'rgba(255, 73, 64, 0.6)',
+  canvas.renderAll.bind(canvas)
+)
+const canvasTwo = fabric.createCanvasForNode(690, 984, {})
+canvasTwo.setBackgroundColor(
+  'rgba(255, 73, 64, 0.6)',
+  canvas.renderAll.bind(canvas)
+)
 /*
 var komika = new canvasTwo.Font(
   'Komika',
@@ -69,18 +79,39 @@ let enlargedBoxes = filteredBoxes.map(a => {
   return a
 })
 
-renderBoxes(enlargedBoxes)
+renderBoxes(enlargedBoxes, canvas)
 testIntersection(canvas)
 let ids = extractGroupIds(canvas)
 let boxesWithGroupId = addGroupIds(ids, enlargedBoxes)
+
+// Concave malarkey
+
+let arrayOfHulls = filterBucket(groupForHull(boxesWithGroupId), 4)
+let concaveOutlines = arrayOfHulls.map(a => {
+  return concave(a)
+})
+let convexOutlines = arrayOfHulls.map(a => {
+  return convex(a)
+})
+let concaves = mapXYArrayToXYObject(concaveOutlines)
+let convexes = mapXYArrayToXYObject(convexOutlines)
+
+convexes.forEach(c => {
+  renderBox(c, canvasTwo)
+})
+
+// fs.writeFile('grouped.json', JSON.stringify(concaves))
+/*
+
+// Grouping using coordinates from 'Group' in Fabric JS (so very basic)
 let canvasBucket = addPolysToCanvas(boxesWithGroupId)
 let groupedPolys = groupPolys(canvasBucket)
 let filteredBucket = filterBucket(groupedPolys, 2)
 addGroupsToCanvas(canvasTwo, filteredBucket)
-
+*/
 // render normal and larger boxes to canvas to show difference
 
-function renderBoxes (arr) {
+function renderBoxes (arr, canvas) {
   arr.forEach(a => {
     let largePoly = new fabric.Polygon(a.enlargedCoords, {
       left: a.enlargedCoords[0].x,
@@ -102,6 +133,27 @@ function renderBoxes (arr) {
     canvas.add(poly)
     canvas.add(largePoly)
   })
+}
+
+// simple function to render one polygon of {x, y} coordinates
+
+function renderBox (arr, canvas) {
+  let poly = new fabric.Polygon(arr, {
+    left: arr[0].x,
+    top: arr[0].y,
+    stroke: 'white',
+    strokeWidth: 1,
+    fill: 'white'
+  })
+  let text = new fabric.Text('XY', {
+    left: arr[0].x,
+    top: arr[0].y,
+    stroke: 'black',
+    fontFamily: 'Arial',
+    fontSize: 15
+  })
+  canvas.add(poly)
+  canvas.add(text)
 }
 
 /*
@@ -283,7 +335,49 @@ function addGroupIds (ids, arr) {
   return arr
 }
 
-// create polys to enable grouping
+// create separate array containing arrays of array of coordinates
+// ;[[[1, 2], [2, 4]], [2, 4], [1, 2]]
+
+function groupForHull (arr) {
+  let groupedPolygons = _.groupBy(arr, 'groupId')
+  let val = _.values(groupedPolygons)
+  return val.map(v => {
+    return _.flatten(
+      v.map(i => {
+        return i.enlargedCoords.map(c => {
+          return _.values(c)
+        })
+      }),
+      true
+    )
+  })
+}
+
+// function to take arr of points and return polygon
+
+function concave (arr) {
+  return concaveman(arr)
+}
+
+function convex (arr) {
+  return ch(arr)
+}
+
+// function to create x, y objects from given array
+
+function createXY (a) {
+  return { x: a[0], y: a[1] }
+}
+
+function mapXYArrayToXYObject (arr) {
+  return arr.map(v => {
+    return v.map(i => {
+      return createXY(i)
+    })
+  })
+}
+
+// create polys to enable grouping (as groups are created from an array of Fabric polys)
 
 function addPolysToCanvas (arr) {
   let polyBucket = []
@@ -306,12 +400,12 @@ function addPolysToCanvas (arr) {
 
 function groupPolys (polys) {
   let groupedPolygons = _.groupBy(polys, 'groupId')
-  let target = _.pairs(groupedPolygons)
-
+  let target = _.values(groupedPolygons)
+  /*
   let groupedPolys = target.map(t => {
     return t[1]
-  })
-  return groupedPolys
+  }) */
+  return target
 }
 
 // filter groups down on basis that if only X polys, unlikely to be text box (on basis that poly is usually 1 word)
@@ -319,6 +413,7 @@ function groupPolys (polys) {
 function filterBucket (arr, y) {
   let filteredArray = []
   arr.forEach(n => {
+    console.log(n.length)
     if (n.length > y) filteredArray.push(n)
   })
   return filteredArray
