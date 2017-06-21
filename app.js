@@ -95,20 +95,20 @@ let convexOutlines = arrayOfHulls.map(a => {
 })
 let concaves = mapXYArrayToXYObject(concaveOutlines)
 let convexes = mapXYArrayToXYObject(convexOutlines)
-
+/*
 convexes.forEach(c => {
   renderBox(c, canvasTwo)
 })
+*/
 
 // fs.writeFile('grouped.json', JSON.stringify(concaves))
-/*
 
 // Grouping using coordinates from 'Group' in Fabric JS (so very basic)
 let canvasBucket = addPolysToCanvas(boxesWithGroupId)
 let groupedPolys = groupPolys(canvasBucket)
 let filteredBucket = filterBucket(groupedPolys, 2)
 addGroupsToCanvas(canvasTwo, filteredBucket)
-*/
+
 // render normal and larger boxes to canvas to show difference
 
 function renderBoxes (arr, canvas) {
