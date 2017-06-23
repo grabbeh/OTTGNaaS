@@ -7,7 +7,7 @@
     "canvas": "^1.6.5",
     "concaveman": "^1.1.1",
     "convex-hull": "^1.0.3",
-    "quick-hull-2d":"0.1.0,
+    "quick-hull-2d":"0.1.0",
     "express": "^4.15.3",
     "fabric": "1.7.12",
     "jimp": "^0.2.28",
