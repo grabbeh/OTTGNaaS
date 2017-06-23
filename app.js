@@ -4,7 +4,7 @@ const path = require('path')
 const _ = require('underscore')
 const __ = require('lodash')
 const concaveman = require('concaveman')
-const ch = require('convex-hull')
+const ch = require('quick-hull-2d')
 const fabric = require('fabric').fabric
 const Jimp = require('jimp')
 const canvas = fabric.createCanvasForNode(690, 984, {})
@@ -87,19 +87,19 @@ let boxesWithGroupId = addGroupIds(ids, enlargedBoxes)
 // Concave malarkey
 
 let arrayOfHulls = filterBucket(groupForHull(boxesWithGroupId), 4)
-let concaveOutlines = arrayOfHulls.map(a => {
+/*let concaveOutlines = arrayOfHulls.map(a => {
   return concave(a)
-})
+})*/
 let convexOutlines = arrayOfHulls.map(a => {
-  return convex(a)
+  return ch(a)
 })
-let concaves = mapXYArrayToXYObject(concaveOutlines)
+//let concaves = mapXYArrayToXYObject(concaveOutlines)
 let convexes = mapXYArrayToXYObject(convexOutlines)
-/*
+
 convexes.forEach(c => {
   renderBox(c, canvasTwo)
 })
-*/
+
 
 // fs.writeFile('grouped.json', JSON.stringify(concaves))
 
