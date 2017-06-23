@@ -339,9 +339,7 @@ function addGroupIds (ids, arr) {
 // ;[[[1, 2], [2, 4]], [2, 4], [1, 2]]
 
 function groupForHull (arr) {
-  let groupedPolygons = _.groupBy(arr, 'groupId')
-  let val = _.values(groupedPolygons)
-  return val.map(v => {
+  return _.values(_.groupBy(arr, 'groupId')).map(v => {
     return _.flatten(
       v.map(i => {
         return i.enlargedCoords.map(c => {
