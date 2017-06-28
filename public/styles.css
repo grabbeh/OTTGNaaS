@@ -1,14 +1,8 @@
-#container {
-position: relative;
-}
-#container canvas, #overlay {
-position: absolute;
+@font-face {
+    font-family: Komikax;
+    src: url('/KOMIKAX_.ttf');
 }
 
-#overlay {
-background-image: url("novel.jpg")
-}
-
-.image {
-  background-image: url("novel.jpg")
+body {
+  font-family: Komikax, Arial;
 }

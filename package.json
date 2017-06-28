@@ -7,11 +7,12 @@
     "canvas": "^1.6.5",
     "concaveman": "^1.1.1",
     "convex-hull": "^1.0.3",
-    "quick-hull-2d":"0.1.0",
     "express": "^4.15.3",
     "fabric": "1.7.12",
     "jimp": "^0.2.28",
     "lodash": "^4.17.4",
+    "monotone-convex-hull-2d": "^1.0.1",
+    "quick-hull-2d": "0.1.0",
     "underscore": "1.8.3"
   },
   "devDependencies": {},

@@ -1,12 +1,10 @@
-// const express = require('express')
-// const app = express()
 const path = require('path')
 const _ = require('underscore')
 const __ = require('lodash')
-const concaveman = require('concaveman')
+// const concaveman = require('concaveman')
 const ch = require('quick-hull-2d')
 const fabric = require('fabric').fabric
-const Jimp = require('jimp')
+// const Jimp = require('jimp')
 const canvas = fabric.createCanvasForNode(690, 984, {})
 canvas.setBackgroundColor(
   'rgba(255, 73, 64, 0.6)',
@@ -84,31 +82,33 @@ testIntersection(canvas)
 let ids = extractGroupIds(canvas)
 let boxesWithGroupId = addGroupIds(ids, enlargedBoxes)
 
-// Concave malarkey
+// Convex malarkey
 
-let arrayOfHulls = filterBucket(groupForHull(boxesWithGroupId), 4)
-/*let concaveOutlines = arrayOfHulls.map(a => {
-  return concave(a)
-})*/
-let convexOutlines = arrayOfHulls.map(a => {
-  return ch(a)
-})
-//let concaves = mapXYArrayToXYObject(concaveOutlines)
-let convexes = mapXYArrayToXYObject(convexOutlines)
+let arrayOfHulls = filterBucket(groupForHull(boxesWithGroupId), 8)
+
+let convexes = mapXYArrayToXYObject(
+  arrayOfHulls.map(a => {
+    return ch(a)
+  })
+)
+
+exports.getData = function (fn) {
+  return fn(null, convexes)
+}
 
 convexes.forEach(c => {
-  renderBox(c, canvasTwo)
+  renderBox(c, canvas)
 })
-
 
 // fs.writeFile('grouped.json', JSON.stringify(concaves))
 
 // Grouping using coordinates from 'Group' in Fabric JS (so very basic)
+/*
 let canvasBucket = addPolysToCanvas(boxesWithGroupId)
 let groupedPolys = groupPolys(canvasBucket)
 let filteredBucket = filterBucket(groupedPolys, 2)
 addGroupsToCanvas(canvasTwo, filteredBucket)
-
+*/
 // render normal and larger boxes to canvas to show difference
 
 function renderBoxes (arr, canvas) {
@@ -139,36 +139,14 @@ function renderBoxes (arr, canvas) {
 
 function renderBox (arr, canvas) {
   let poly = new fabric.Polygon(arr, {
-    left: arr[0].x,
-    top: arr[0].y,
+    // left: arr[0].x,
+    // top: arr[0].y,
     stroke: 'white',
     strokeWidth: 1,
     fill: 'white'
   })
-  let text = new fabric.Text('XY', {
-    left: arr[0].x,
-    top: arr[0].y,
-    stroke: 'black',
-    fontFamily: 'Arial',
-    fontSize: 15
-  })
   canvas.add(poly)
-  canvas.add(text)
 }
-
-/*
-app.use(express.static('public'))
-
-app.get('/', function (req, res) {
-  res.sendFile(path.join(__dirname + '/index.html'))
-})
-
-app.get('/data', function (req, res) {
-  res.send(boxes)
-})
-
-app.listen(2000)
-*/
 
 function calculateArea (arr) {
   let lowX = null
@@ -262,8 +240,7 @@ function addArea (arr) {
 
 // increase area of text box to enable intersection check
 
-function increaseArea (a, xInc, yInc) {
-  let c = __.cloneDeep(a)
+function increaseArea (c, xInc, yInc) {
   c[0].x = c[0].x - xInc
   c[0].y = c[0].y - yInc
   c[3].x = c[3].x - xInc
@@ -342,23 +319,13 @@ function groupForHull (arr) {
   return _.values(_.groupBy(arr, 'groupId')).map(v => {
     return _.flatten(
       v.map(i => {
-        return i.enlargedCoords.map(c => {
+        return i.coords.map(c => {
           return _.values(c)
         })
       }),
       true
     )
   })
-}
-
-// function to take arr of points and return polygon
-
-function concave (arr) {
-  return concaveman(arr)
-}
-
-function convex (arr) {
-  return ch(arr)
 }
 
 // function to create x, y objects from given array
@@ -381,6 +348,7 @@ function addPolysToCanvas (arr) {
   let polyBucket = []
   arr.forEach(a => {
     let poly = new fabric.Polygon(a.coords, {
+      // first x,y in array may not be top left point leading to misplacement of polygon
       left: a.coords[0].x,
       top: a.coords[0].y,
       stroke: 'red',
@@ -411,7 +379,6 @@ function groupPolys (polys) {
 function filterBucket (arr, y) {
   let filteredArray = []
   arr.forEach(n => {
-    console.log(n.length)
     if (n.length > y) filteredArray.push(n)
   })
   return filteredArray
