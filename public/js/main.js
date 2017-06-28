@@ -7,19 +7,19 @@ window.onload = function () {
     const clean = JSON.parse(this.responseText)
     var canvas = new fabric.Canvas('c', { height: 984, width: 690 })
     canvas.setBackgroundImage('novel.jpg', canvas.renderAll.bind(canvas), {})
-    clean.forEach(function (i) {
-      renderBox(i, canvas)
+    clean.forEach(function (c, i) {
+      renderBox(c, i, canvas)
     })
   }
 }
 
-function renderBox (arr, canvas) {
+function renderBox (arr, text, canvas) {
   let poly = new fabric.Polygon(arr, {
     stroke: 'white',
     strokeWidth: 1,
     fill: 'white'
   })
-  let text = new fabric.Text('TEST', {
+  let text = new fabric.Text(text.toString(), {
     left: arr[0].x,
     top: arr[0].y,
     stroke: 'black',
