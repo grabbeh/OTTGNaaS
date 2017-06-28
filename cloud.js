@@ -1,6 +1,11 @@
 // Imports the Google Cloud client library
 const Vision = require('@google-cloud/vision');
 
+var vision = require('@google-cloud/vision')({
+  projectId: 'grape-spaceship-123',
+  keyFilename: '/path/to/keyfile.json'
+});
+
 // Your Google Cloud Platform project ID
 const projectId = 'YOUR_PROJECT_ID';
 
@@ -46,28 +51,4 @@ vision.detectText(fileName)
     console.error('ERROR:', err);
   });
 
-// Imports the Google Cloud client libraries
-const Storage = require('@google-cloud/storage');
-const Vision = require('@google-cloud/vision');
 
-// Instantiates clients
-const storage = Storage();
-const vision = Vision();
-
-// The name of the bucket where the file resides, e.g. "my-bucket"
-// const bucketName = 'my-bucket';
-
-// The path to the file within the bucket, e.g. "path/to/image.png"
-// const fileName = 'path/to/image.png';
-
-// Performs text detection on the remote file
-vision.detectText(storage.bucket(bucketName).file(fileName))
-  .then((results) => {
-    const detections = results[0];
-
-    console.log('Text:');
-    detections.forEach((text) => console.log(text));
-  })
-  .catch((err) => {
-    console.error('ERROR:', err);
-  });
