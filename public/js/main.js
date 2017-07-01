@@ -19,7 +19,7 @@ function renderBox (arr, text, canvas) {
     strokeWidth: 1,
     fill: 'white'
   })
-  let text = new fabric.Text(text.toString(), {
+  let t = new fabric.Text(text.toString(), {
     left: arr[0].x,
     top: arr[0].y,
     stroke: 'black',
@@ -27,5 +27,5 @@ function renderBox (arr, text, canvas) {
     fontSize: 10
   })
   canvas.add(poly)
-  canvas.add(text)
+  canvas.add(t)
 }

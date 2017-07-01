@@ -1,12 +1,12 @@
 const express = require('express')
 const app = express()
 const path = require('path')
-const fn = require('./app.js')
+const fn = require('./compiled/app')
 
 app.use(express.static('public'))
 
 app.get('/', function (req, res) {
-  res.sendFile(path.join(__dirname, '/index.html'))
+  res.sendFile(path.join(__dirname, '../public/index.html'))
 })
 
 app.get('/data', function (req, res) {
