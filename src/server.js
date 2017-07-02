@@ -1,7 +1,7 @@
 const express = require('express')
 const app = express()
 const path = require('path')
-const process = require('./compiled/app')
+const getSpeech = require('./speech')
 
 app.use(express.static('public'))
 
@@ -9,11 +9,9 @@ app.get('/', function (req, res) {
   res.sendFile(path.join(__dirname, '../public/index.html'))
 })
 
-app.get('/data', function (req, res) {
-  process.getData(function (err, data) {
-    if (err) console.log(err)
-    res.json(data)
-  })
+app.get('/data', async function (req, res) {
+  let data = await getSpeech('public/novel.jpg')
+  res.json(data)
 })
 
 app.listen(2000)

@@ -4,46 +4,28 @@ const _ = require('underscore')
 const __ = require('lodash')
 const ch = require('quick-hull-2d')
 const fabric = require('fabric').fabric
-// const Jimp = require('jimp')
 const canvas = fabric.createCanvasForNode(690, 984, {})
 canvas.setBackgroundColor(
   'rgba(255, 73, 64, 0.6)',
   canvas.renderAll.bind(canvas)
 )
 const fs = require('fs')
-const url = path.join(__dirname, '../public/novel.jpg')
 
-detectText(url).then(annotations => {
-  const polys = annotations.map(a => {
+module.exports = async (url, fn) => {
+  let annotations = await detectText(url)
+  const polys = annotations.map((a, i) => {
     return {
       coords: a.boundingPoly.vertices,
       area: null,
-      id: null,
+      id: i,
       groupId: null
     }
   })
-  polys.forEach((p, i) => {
-    p.id = i
-  })
-
-  /*
-Jimp.read('./public/novel.jpg')
-  .then(function (jpg) {
-    const w = jpg.bitmap.width
-    const h = jpg.bitmap.height
-    const canvas = fabric.createCanvasForNode(w, h)
-  })
-  .catch(function (err) {
-    console.error(err)
-  }) */
-
   const out = fs.createWriteStream(path.join(__dirname, '../output/poly.png'))
-
   let stream = canvas.createPNGStream()
   stream.on('data', function (chunk) {
     out.write(chunk)
   })
-
   let clean = cleanPolys(polys)
   let high = getHighestCoords(clean)
   let coordsOfHighest = createCoords(high)
@@ -53,35 +35,24 @@ Jimp.read('./public/novel.jpg')
     let acceptableArea = largestArea / 1
     return a.area < acceptableArea
   })
-
   let enlargedBoxes = filteredBoxes.map(a => {
     a.enlargedCoords = increaseArea(__.cloneDeep(a.coords), 5, 7.5)
     return a
   })
-
   renderBoxes(enlargedBoxes, canvas)
   testIntersection(canvas)
-  let ids = extractGroupIds(canvas)
-  let boxesWithGroupId = addGroupIds(ids, enlargedBoxes)
-
-  // Convex malarkey
-
-  let arrayOfHulls = filterBucket(groupForHull(boxesWithGroupId), 8)
-
-  let convexes = mapXYArrayToXYObject(
-    arrayOfHulls.map(a => {
+  let boxesWithGroupId = addGroupIds(extractGroupIds(canvas), enlargedBoxes)
+  let speechBubbles = filterBucket(groupForHull(boxesWithGroupId), 8)
+  let convexSpeechBubbles = mapXYArrayToXYObject(
+    speechBubbles.map(a => {
       return ch(a)
     })
   )
-
-  exports.getData = function (fn) {
-    return fn(null, convexes)
-  }
-
-  convexes.forEach(c => {
+  convexSpeechBubbles.forEach(c => {
     renderBox(c, canvas)
   })
-})
+  return convexSpeechBubbles
+}
 
 const renderBoxes = (arr, canvas) => {
   arr.forEach(a => {
@@ -111,8 +82,6 @@ const renderBoxes = (arr, canvas) => {
 
 const renderBox = (arr, canvas) => {
   let poly = new fabric.Polygon(arr, {
-    // left: arr[0].x,
-    // top: arr[0].y,
     stroke: 'white',
     strokeWidth: 1,
     fill: 'white'

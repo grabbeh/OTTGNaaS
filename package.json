@@ -30,7 +30,7 @@
   },
   "scripts": {
     "babel": "babel src -watch --out-dir compiled",
-    "browserify": "browserify public/js/main.js -o public/compiled/bundle.js"
+    "browserify": "browserify public/js/main.js -o public/dist/bundle.js"
   },
   "babel": {
     "presets": [
