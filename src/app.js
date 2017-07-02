@@ -1,4 +1,4 @@
-const cloud = require('./cloud')
+const detectText = require('./text')
 const path = require('path')
 const _ = require('underscore')
 const __ = require('lodash')
@@ -11,23 +11,22 @@ canvas.setBackgroundColor(
   canvas.renderAll.bind(canvas)
 )
 const fs = require('fs')
+const url = path.join(__dirname, '../public/novel.jpg')
 
-cloud
-  .detectText(path.join(__dirname, '../public/novel.jpg'))
-  .then(annotations => {
-    const polys = annotations.map(a => {
-      return {
-        coords: a.boundingPoly.vertices,
-        area: null,
-        id: null,
-        groupId: null
-      }
-    })
-    polys.forEach((p, i) => {
-      p.id = i
-    })
+detectText(url).then(annotations => {
+  const polys = annotations.map(a => {
+    return {
+      coords: a.boundingPoly.vertices,
+      area: null,
+      id: null,
+      groupId: null
+    }
+  })
+  polys.forEach((p, i) => {
+    p.id = i
+  })
 
-    /*
+  /*
 Jimp.read('./public/novel.jpg')
   .then(function (jpg) {
     const w = jpg.bitmap.width
@@ -38,51 +37,51 @@ Jimp.read('./public/novel.jpg')
     console.error(err)
   }) */
 
-    const out = fs.createWriteStream(path.join(__dirname, '../output/poly.png'))
+  const out = fs.createWriteStream(path.join(__dirname, '../output/poly.png'))
 
-    let stream = canvas.createPNGStream()
-    stream.on('data', function (chunk) {
-      out.write(chunk)
-    })
-
-    let clean = cleanPolys(polys)
-    let high = getHighestCoords(clean)
-    let coordsOfHighest = createCoords(high)
-    let largestArea = calculateArea(coordsOfHighest)
-    let areas = addArea(clean)
-    let filteredBoxes = areas.filter(a => {
-      let acceptableArea = largestArea / 1
-      return a.area < acceptableArea
-    })
-
-    let enlargedBoxes = filteredBoxes.map(a => {
-      a.enlargedCoords = increaseArea(__.cloneDeep(a.coords), 5, 7.5)
-      return a
-    })
-
-    renderBoxes(enlargedBoxes, canvas)
-    testIntersection(canvas)
-    let ids = extractGroupIds(canvas)
-    let boxesWithGroupId = addGroupIds(ids, enlargedBoxes)
-
-    // Convex malarkey
-
-    let arrayOfHulls = filterBucket(groupForHull(boxesWithGroupId), 8)
-
-    let convexes = mapXYArrayToXYObject(
-      arrayOfHulls.map(a => {
-        return ch(a)
-      })
-    )
-
-    exports.getData = function (fn) {
-      return fn(null, convexes)
-    }
-
-    convexes.forEach(c => {
-      renderBox(c, canvas)
-    })
+  let stream = canvas.createPNGStream()
+  stream.on('data', function (chunk) {
+    out.write(chunk)
   })
+
+  let clean = cleanPolys(polys)
+  let high = getHighestCoords(clean)
+  let coordsOfHighest = createCoords(high)
+  let largestArea = calculateArea(coordsOfHighest)
+  let areas = addArea(clean)
+  let filteredBoxes = areas.filter(a => {
+    let acceptableArea = largestArea / 1
+    return a.area < acceptableArea
+  })
+
+  let enlargedBoxes = filteredBoxes.map(a => {
+    a.enlargedCoords = increaseArea(__.cloneDeep(a.coords), 5, 7.5)
+    return a
+  })
+
+  renderBoxes(enlargedBoxes, canvas)
+  testIntersection(canvas)
+  let ids = extractGroupIds(canvas)
+  let boxesWithGroupId = addGroupIds(ids, enlargedBoxes)
+
+  // Convex malarkey
+
+  let arrayOfHulls = filterBucket(groupForHull(boxesWithGroupId), 8)
+
+  let convexes = mapXYArrayToXYObject(
+    arrayOfHulls.map(a => {
+      return ch(a)
+    })
+  )
+
+  exports.getData = function (fn) {
+    return fn(null, convexes)
+  }
+
+  convexes.forEach(c => {
+    renderBox(c, canvas)
+  })
+})
 
 const renderBoxes = (arr, canvas) => {
   arr.forEach(a => {

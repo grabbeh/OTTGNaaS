@@ -5,13 +5,18 @@
   "main": "index.js",
   "dependencies": {
     "@google-cloud/vision": "^0.11.3",
+    "browser-request": "^0.3.3",
     "canvas": "^1.6.5",
+    "domready": "^1.0.8",
     "express": "^4.15.3",
     "fabric": "^1.7.12",
+    "google-images": "^2.1.0",
     "jimp": "^0.2.28",
     "lodash": "^4.17.4",
     "quick-hull-2d": "0.1.0",
-    "underscore": "1.8.3"
+    "superagent": "^3.5.2",
+    "underscore": "1.8.3",
+    "unfluff": "^1.1.0"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
@@ -24,7 +29,8 @@
     "browserify": "^14.4.0"
   },
   "scripts": {
-    "babel": "babel src -watch --out-dir compiled"
+    "babel": "babel src -watch --out-dir compiled",
+    "browserify": "browserify public/js/main.js -o public/compiled/bundle.js"
   },
   "babel": {
     "presets": [

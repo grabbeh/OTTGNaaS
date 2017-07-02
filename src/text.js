@@ -12,4 +12,4 @@ async function detectText (url) {
   return results[1].responses[0].textAnnotations
 }
 
-exports.detectText = detectText
+module.exports = detectText

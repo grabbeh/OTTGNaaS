@@ -1,17 +1,19 @@
-window.onload = function () {
-  var req = new XMLHttpRequest()
-  req.addEventListener('load', reqListener)
-  req.open('GET', '/data')
-  req.send()
-  function reqListener () {
-    const clean = JSON.parse(this.responseText)
-    var canvas = new fabric.Canvas('c', { height: 984, width: 690 })
+const domready = require('domready')
+const request = require('browser-request')
+const fabric = require('fabric').fabric
+
+domready(() => {
+  request({ method: 'GET', url: '/data', json: true }, (err, res) => {
+    if (err) console.log(err)
+    const clean = res.body
+    console.log(clean)
+    const canvas = new fabric.Canvas('c', { height: 984, width: 690 })
     canvas.setBackgroundImage('novel.jpg', canvas.renderAll.bind(canvas), {})
     clean.forEach(function (c, i) {
       renderBox(c, i, canvas)
     })
-  }
-}
+  })
+})
 
 function renderBox (arr, text, canvas) {
   let poly = new fabric.Polygon(arr, {
