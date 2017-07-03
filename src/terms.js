@@ -12,7 +12,7 @@ const start = async function (x) {
 start()
 
 function returnSlice(x, arr){
-  var potentialStartPoints = arr.length - x
+  var potentialStartPoints = arr.length - x + 1
   var randomStartPoint = Math.floor(potentialStartPoints * Math.random())
   return a.slice(randomStartPoint, randomStartPoint + x)
 }
