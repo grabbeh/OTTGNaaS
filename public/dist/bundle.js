@@ -35059,24 +35059,26 @@ domready(() => {
     if (err) console.log(err)
     const canvas = new fabric.Canvas('c', { height: 984, width: 690 })
     canvas.setBackgroundImage('novel.jpg', canvas.renderAll.bind(canvas), {})
-    res.body.forEach(function (c, i) {
-      renderBox(c, i, canvas)
+    console.log(res.body)
+    res.body.data.forEach(function (c, i) {
+      renderBox(c.coordinates, c.terms, c.width, c.topLeft, canvas)
     })
   })
 })
 
-function renderBox (arr, text, canvas) {
+function renderBox (arr, text, width, topLeft, canvas) {
   let poly = new fabric.Polygon(arr, {
     stroke: 'white',
     strokeWidth: 1,
     fill: 'white'
   })
-  let t = new fabric.Text(text.toString(), {
-    left: arr[0].x,
-    top: arr[0].y,
+  let t = new fabric.Textbox(text, {
+    left: topLeft.x + 5,
+    top: topLeft.y,
     stroke: 'black',
     fontFamily: 'Komikax',
-    fontSize: 10
+    fontSize: 5,
+    width: width - 10
   })
   canvas.add(poly)
   canvas.add(t)
