@@ -36,8 +36,8 @@ module.exports = async imageData => {
   let largestArea = calculateArea(coordsOfHighest)
   let areas = addArea(clean)
   let filteredBoxes = areas.filter(a => {
-    let acceptableArea = largestArea / 1
-    return a.area < acceptableArea
+    let acceptableArea = largestArea / 5
+    if (a.area < acceptableArea) return a.area
   })
   let enlargedBoxes = filteredBoxes.map(a => {
     a.enlargedCoords = increaseArea(__.cloneDeep(a.coords), 5, 7.5)

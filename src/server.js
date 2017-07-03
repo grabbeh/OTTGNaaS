@@ -13,11 +13,17 @@ app.get('/', (req, res) => {
 })
 
 app.get('/data', async (req, res) => {
-  let imageData = {
+  let baseImageData = {
     url: 'public/novel.jpg',
     clientUrl: 'novel.jpg',
     width: 690,
     height: 984
+  }
+  let imageData = {
+    url: 'http://s3.amazonaws.com/uploads.kidzworld.com/article/32607/Sphinx_p7.jpg?1251315069',
+    clientUrl: 'http://s3.amazonaws.com/uploads.kidzworld.com/article/32607/Sphinx_p7.jpg?1251315069',
+    width: 715,
+    height: 894
   }
   // let imageData = await getUrl()
   let data = await getSpeech(imageData)
