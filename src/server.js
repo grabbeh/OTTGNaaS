@@ -3,6 +3,7 @@ const app = express()
 const path = require('path')
 const getSpeech = require('./speech')
 const getTerms = require('./terms')
+const getUrl = require('./image')
 const helper = require('./helper')
 
 app.use(express.static('public'))
@@ -12,8 +13,14 @@ app.get('/', (req, res) => {
 })
 
 app.get('/data', async (req, res) => {
-  let url = 'public/novel.jpg'
-  let data = await getSpeech('public/novel.jpg')
+  let imageData = {
+    url: 'public/novel.jpg',
+    clientUrl: 'novel.jpg',
+    width: 690,
+    height: 984
+  }
+  // let imageData = await getUrl()
+  let data = await getSpeech(imageData)
   let terms = await getTerms(data.length)
   let combinedData = data.map((d, i) => {
     return {
@@ -24,7 +31,7 @@ app.get('/data', async (req, res) => {
     }
   })
   let o = {}
-  o.url = url
+  o.imageData = imageData
   o.data = combinedData
   res.json(o)
 })

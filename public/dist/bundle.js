@@ -35057,10 +35057,17 @@ const fabric = require('fabric').fabric
 domready(() => {
   request({ method: 'GET', url: '/data', json: true }, (err, res) => {
     if (err) console.log(err)
-    const canvas = new fabric.Canvas('c', { height: 984, width: 690 })
-    canvas.setBackgroundImage('novel.jpg', canvas.renderAll.bind(canvas), {})
-    console.log(res.body)
-    res.body.data.forEach(function (c, i) {
+    let result = res.body
+    const canvas = new fabric.Canvas('c', {
+      height: result.imageData.height,
+      width: result.imageData.width
+    })
+    canvas.setBackgroundImage(
+      result.imageData.clientUrl,
+      canvas.renderAll.bind(canvas),
+      {}
+    )
+    result.data.forEach(function (c, i) {
       renderBox(c.coordinates, c.terms, c.width, c.topLeft, canvas)
     })
   })

@@ -4,15 +4,19 @@ const _ = require('underscore')
 const __ = require('lodash')
 const ch = require('quick-hull-2d')
 const fabric = require('fabric').fabric
-const canvas = fabric.createCanvasForNode(690, 984, {})
-canvas.setBackgroundColor(
-  'rgba(255, 73, 64, 0.6)',
-  canvas.renderAll.bind(canvas)
-)
 const fs = require('fs')
 
-module.exports = async (url, fn) => {
-  let annotations = await detectText(url)
+module.exports = async imageData => {
+  let annotations = await detectText(imageData.url)
+  const canvas = fabric.createCanvasForNode(
+    imageData.width,
+    imageData.height,
+    {}
+  )
+  canvas.setBackgroundColor(
+    'rgba(255, 73, 64, 0.6)',
+    canvas.renderAll.bind(canvas)
+  )
   const polys = annotations.map((a, i) => {
     return {
       coords: a.boundingPoly.vertices,
