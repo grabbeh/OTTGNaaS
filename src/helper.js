@@ -21,7 +21,7 @@ exports.getTopLeft = a => {
   }
 }
 
-exports.calculateArea = arr => {
+exports.getArea = arr => {
   let lowX = null
   let lowY = null
   let highX = null
