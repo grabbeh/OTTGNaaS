@@ -36,6 +36,11 @@ let vectors = flat.map(f => {
 let clusterResult = cluster(vectors)
 let matchResult = matchBack(speechAreas, textAreas, clusterResult)
 
+var numbers = [4, 2, 5, 1, 3]
+numbers.sort(function(a, b) {
+  return a - b
+})
+   
 function matchBack(speechAreas, textAreas, clusterResult){
   let arr = []
   speechAreas.forEach(s => {
