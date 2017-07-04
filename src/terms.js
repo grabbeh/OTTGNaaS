@@ -4,9 +4,9 @@ const unfluff = require('unfluff')
 module.exports = async function (url, len) {
   const url = url || 'https://www.google.com/policies/privacy/'
   let result = await superagent.get(url)
-  let cleaned = unfluff(res.text)
+  let cleaned = unfluff(result.text)
   let arr = cleaned.text.split('.')
-  if (x) returnSlice(x, arr)
+  if (len) returnSlice(len, arr)
   else return arr
 }
 
