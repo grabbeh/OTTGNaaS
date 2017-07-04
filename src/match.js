@@ -28,7 +28,7 @@ let speechAreas = speech.map(s, i => {
 let arr = []
 arr.push(textAreas)
 arr.push(speechAreas)
-let flat = _.flatten(arr)
+let flat = _.flatten(arr, true)
 let vectors = flat.map(f => {
    return [f.area]
 })
