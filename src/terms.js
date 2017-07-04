@@ -1,12 +1,14 @@
 const superagent = require('superagent')
 const unfluff = require('unfluff')
-const url = 'https://www.google.com/policies/privacy/'
 
-module.exports = async function (x) {
+
+module.exports = async function (url, len) {
+  const url = url || 'https://www.google.com/policies/privacy/'
   let res = await superagent.get(url)
   let data = unfluff(res.text)
   let arr = data.text.split('.')
-  return returnSlice(x, arr)
+  if (x) returnSlice(x, arr)
+  else return arr
 }
 
 const returnSlice = (x, arr) => {
