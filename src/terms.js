@@ -1,7 +1,6 @@
 const superagent = require('superagent')
 const unfluff = require('unfluff')
 
-
 module.exports = async function (url, len) {
   const url = url || 'https://www.google.com/policies/privacy/'
   let res = await superagent.get(url)
