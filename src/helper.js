@@ -50,4 +50,4 @@ exports.getArea = arr => {
   return area
 }
 
-exports.matchTextLengthToArea = () => {}
+
