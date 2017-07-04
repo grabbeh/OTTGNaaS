@@ -21,4 +21,33 @@ exports.getTopLeft = a => {
   }
 }
 
+exports.calculateArea = arr => {
+  let lowX = null
+  let lowY = null
+  let highX = null
+  let highY = null
+  var o = { lowX, lowY, highX, highY }
+  lowX = arr[0].x
+  lowY = arr[0].y
+  for (let coord of arr) {
+    if (coord.x > highX) {
+      o.highX = coord.x
+    }
+    if (coord.y > highY) {
+      o.highY = coord.y
+    }
+    if (coord.x < lowX) {
+      o.lowx = coord.x
+    }
+    if (coord.y < lowY) {
+      o.lowY = coord.y
+    }
+  }
+
+  let width = o.highX - o.lowX
+  let height = o.highY - o.lowY
+  let area = width * height
+  return area
+}
+
 exports.matchTextLengthToArea = () => {}
