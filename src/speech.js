@@ -1,4 +1,5 @@
 const detectText = require('./text')
+const helper = require('./helper')
 const path = require('path')
 const _ = require('underscore')
 const __ = require('lodash')
@@ -33,7 +34,7 @@ module.exports = async imageData => {
   let clean = cleanPolys(polys)
   let high = getHighestCoords(clean)
   let coordsOfHighest = createCoords(high)
-  let largestArea = calculateArea(coordsOfHighest)
+  let largestArea = helper.getArea(coordsOfHighest)
   let areas = addArea(clean)
   let filteredBoxes = areas.filter(a => {
     let acceptableArea = largestArea / 5
@@ -91,35 +92,6 @@ const renderBox = (arr, canvas) => {
     fill: 'white'
   })
   canvas.add(poly)
-}
-
-const calculateArea = arr => {
-  let lowX = null
-  let lowY = null
-  let highX = null
-  let highY = null
-  var o = { lowX, lowY, highX, highY }
-  lowX = arr[0].x
-  lowY = arr[0].y
-  for (let coord of arr) {
-    if (coord.x > highX) {
-      o.highX = coord.x
-    }
-    if (coord.y > highY) {
-      o.highY = coord.y
-    }
-    if (coord.x < lowX) {
-      o.lowx = coord.x
-    }
-    if (coord.y < lowY) {
-      o.lowY = coord.y
-    }
-  }
-
-  let width = o.highX - o.lowX
-  let height = o.highY - o.lowY
-  let area = width * height
-  return area
 }
 
 // add coordinates if none were added (don't think coords added if 0 for example)
