@@ -37,7 +37,7 @@ module.exports = async imageData => {
   let largestArea = helper.getArea(coordsOfHighest)
   let areas = addArea(clean)
   let filteredBoxes = areas.filter(a => {
-    let acceptableArea = largestArea / 5
+    let acceptableArea = largestArea / 1
     if (a.area < acceptableArea) return a.area
   })
   let enlargedBoxes = filteredBoxes.map(a => {
@@ -150,7 +150,7 @@ const createCoords = o => {
 
 function addArea (arr) {
   for (let box of arr) {
-    box.area = calculateArea(box.coords)
+    box.area = helper.getArea(box.coords)
   }
   return arr
 }

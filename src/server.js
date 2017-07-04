@@ -1,9 +1,13 @@
+process.on('unhandledRejection', function (reason, promise) {
+  console.log(promise)
+})
+
 const express = require('express')
 const app = express()
 const path = require('path')
 const getSpeech = require('./speech')
 const getTerms = require('./terms')
-const getUrl = require('./image')
+// const getUrl = require('./image')
 const match = require('./match')
 
 app.use(express.static('public'))
@@ -26,11 +30,12 @@ app.get('/data', async (req, res) => {
     height: 894
   }
   // let imageData = await getUrl()
-  let data = await getSpeech(imageData)
-  let terms = await getTerms(data.length)
+  let data = await getSpeech(baseImageData)
+  let url = 'https://www.google.com/policies/privacy/'
+  let terms = await getTerms(url, data.length, true)
   let o = {}
-  o.imageData = imageData
-  o.data = combine(data, terms)
+  o.imageData = baseImageData
+  o.data = match(data, terms)
   res.json(o)
 })
 

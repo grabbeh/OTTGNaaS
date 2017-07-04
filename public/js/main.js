@@ -29,10 +29,10 @@ function renderBox (arr, text, width, topLeft, canvas) {
   })
   let t = new fabric.Textbox(text, {
     left: topLeft.x + 5,
-    top: topLeft.y,
+    top: topLeft.y + 5,
     stroke: 'black',
     fontFamily: 'Komikax',
-    fontSize: 5,
+    fontSize: 7,
     width: width - 10
   })
   canvas.add(poly)
