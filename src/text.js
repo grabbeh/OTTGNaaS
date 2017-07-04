@@ -7,9 +7,7 @@ const vision = require('@google-cloud/vision')({
   keyFilename: path.join(__dirname, '../config/key.json')
 })
 
-async function detectText (url) {
+module.exports = async function detectText (url) {
   let results = await vision.readDocument(url)
   return results[1].responses[0].textAnnotations
 }
-
-module.exports = detectText
