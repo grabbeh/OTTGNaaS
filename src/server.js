@@ -4,7 +4,7 @@ const path = require('path')
 const getSpeech = require('./speech')
 const getTerms = require('./terms')
 const getUrl = require('./image')
-const helper = require('./helper')
+const match = require('./match')
 
 app.use(express.static('public'))
 
@@ -28,17 +28,9 @@ app.get('/data', async (req, res) => {
   // let imageData = await getUrl()
   let data = await getSpeech(imageData)
   let terms = await getTerms(data.length)
-  let combinedData = data.map((d, i) => {
-    return {
-      coordinates: d,
-      terms: terms[i],
-      width: helper.getWidth(d),
-      topLeft: helper.getTopLeft(d)
-    }
-  })
   let o = {}
   o.imageData = imageData
-  o.data = combinedData
+  o.data = combine(data, terms)
   res.json(o)
 })
 
