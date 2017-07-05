@@ -16,4 +16,4 @@ Node-canvas has issues with node 7 and above (or maybe it's just me!), and so Ba
 TO DO:
 
 - [ ] Replace Google Cloud Vision API with Tesseract.js
-- [ ] Match length of terms snippet with size of speech bubble
+- [ ] More gracefully match length of terms snippet with size of speech bubble
