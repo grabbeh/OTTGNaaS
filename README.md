@@ -3,7 +3,7 @@ Online Terms to Graphic Novels as a Service
 
 ![example](/demo.PNG)
 
-Work in progress to detect existing speech bubbles in graphic novels and replace with terms and conditions. At present URL and related image data, and a URL to a privacy policy are hard-coded in `/src/servers.js`. Running the following will start a server at `localhost:2000` where the results can be found.
+Work in progress to detect existing speech bubbles in graphic novels and replace with terms and conditions. At present URL and related image data, and a URL to a privacy policy are hard-coded in `/src/servers.js`. Running the below commands will start a server at `localhost:2000` where the results can be found.
 
 Node-canvas has issues with node 7 and above (or maybe it's just me!), and so Babel is used to get access to `async/await` (as they are only available in node 7.6.0 and above). Browserify bundles ./public/js/main for the browser.
 
