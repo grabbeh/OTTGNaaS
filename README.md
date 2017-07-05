@@ -17,3 +17,4 @@ TO DO:
 
 - [ ] Replace Google Cloud Vision API with Tesseract.js
 - [ ] More gracefully match length of terms snippet with size of speech bubble
+- [ ] Develop front end to allow people to generate pages by submitting URL of image and conditions (and submit result for storage potentially)
