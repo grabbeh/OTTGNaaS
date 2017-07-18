@@ -12,6 +12,5 @@ module.exports = async function () {
     }
   })
   let image = images[Math.floor(Math.random() * images.length)]
-  console.log(image)
   return image
 }

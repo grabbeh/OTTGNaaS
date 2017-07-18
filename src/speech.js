@@ -1,4 +1,5 @@
 const detectText = require('./text')
+// const tesseract = require('./tesseract')
 const helper = require('./helper')
 const path = require('path')
 const _ = require('underscore')
@@ -18,6 +19,9 @@ module.exports = async imageData => {
     'rgba(255, 73, 64, 0.6)',
     canvas.renderAll.bind(canvas)
   )
+
+  // Google Vision API
+
   const polys = annotations.map((a, i) => {
     return {
       coords: a.boundingPoly.vertices,
@@ -26,6 +30,17 @@ module.exports = async imageData => {
       groupId: null
     }
   })
+
+  /* Tesseract
+
+  const polys = annotations.map((a, i) => {
+    return {
+      coords: a,
+      area: null,
+      id: i,
+      groupId: null
+    }
+  }) */
   const out = fs.createWriteStream(path.join(__dirname, '../output/poly.png'))
   let stream = canvas.createPNGStream()
   stream.on('data', function (chunk) {
