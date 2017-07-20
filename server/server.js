@@ -7,7 +7,7 @@ const app = express()
 const path = require('path')
 const getSpeech = require('./speech')
 const getTerms = require('./terms')
-// const getUrl = require('./image')
+// const getImage = require('./image')
 const match = require('./match')
 
 app.use(express.static('public'))
@@ -29,7 +29,7 @@ app.get('/data', async (req, res) => {
     width: 715,
     height: 894
   }
-  // let imageData = await getUrl()
+  // let imageData = await getImage()
   let data = await getSpeech(baseImageData)
   let url = 'https://www.google.com/policies/privacy/'
   let terms = await getTerms(url, data.length, true)
