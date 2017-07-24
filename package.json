@@ -5,6 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "@google-cloud/vision": "^0.11.3",
+    "axios": "^0.16.2",
     "browser-request": "^0.3.3",
     "canvas": "^1.6.5",
     "domready": "^1.0.8",
@@ -16,12 +17,12 @@
     "node-kmeans": "^1.1.0",
     "node-tesseract": "^0.2.7",
     "quick-hull-2d": "0.1.0",
+    "react": "^0.14.6",
+    "react-dom": "^0.14.6",
     "superagent": "^3.5.2",
     "tesseract.js": "^1.0.10",
     "underscore": "1.8.3",
-    "unfluff": "^1.1.0",
-    "react": "^0.14.6",
-    "react-dom": "^0.14.6"
+    "unfluff": "^1.1.0"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
@@ -31,11 +32,23 @@
     "babelify": "^7.2.0"
   },
   "scripts": {
-    "server": "babel server -watch --out-dir compiled",
+    "watch-server": "babel server -watch --out-dir compiled",
     "watch": "watchify public/js/main.js -o public/dist/bundle.js",
-    "build-previous": "browserify public/js/main.js -o public/dist/bundle.js",
-    "build": "browserify -t [ babelify --presets [ react ] ] client/index.js -o public/dist/react-bundle.js",
-    "build-full": "npm run build-previous && npm run build"
+    "build-server": "babel server --out-dir compiled",
+    "build-react": "browserify -t [ babelify --presets [ react ] ] client/index.js -o public/dist/react-bundle.js",
+    "build-full": "npm run build-server && npm run build-react && node ./compiled/server.js"
+  },
+  "browserify": {
+    "transform": [
+      [
+        "babelify",
+        {
+          "presets": [
+            "react"
+          ]
+        }
+      ]
+    ]
   },
   "babel": {
     "presets": [
