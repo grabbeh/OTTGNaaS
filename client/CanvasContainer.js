@@ -9,8 +9,9 @@ class CanvasContainer extends React.Component {
   }
 
   componentDidMount () {
+    const { url } = this.props
     axios
-      .get(this.props.url)
+      .get(url)
       .then(d => {
         this.setState({ image: d.data })
       })
@@ -20,8 +21,8 @@ class CanvasContainer extends React.Component {
   }
 
   render () {
-    if (!this.state.image) return <div>Loading</div>
-    if (this.state.image) return <CanvasComponent image={this.state.image} />
+    const { image } = this.state
+    return image ? <CanvasComponent image={image} /> : <div>Loading</div>
   }
 }
 

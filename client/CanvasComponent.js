@@ -20,31 +20,19 @@ function renderBox (arr, text, width, topLeft, canvas) {
   canvas.add(t)
 }
 
-class CanvasComponent extends React.Component {
-  componentDidMount () {
-    const result = this.props.image
-    const canvas = new fabric.Canvas('c', {
-      height: result.imageData.height,
-      width: result.imageData.width
-    })
+function CanvasComponent ({ image }) {
+  const { height, width, clientUrl } = image.imageData
+  const canvas = new fabric.Canvas('c', { height, width })
 
-    canvas.setBackgroundImage(
-      result.imageData.clientUrl,
-      canvas.renderAll.bind(canvas),
-      {}
-    )
-    result.data.forEach(function (c, i) {
-      renderBox(c.coordinates, c.terms, c.width, c.topLeft, canvas)
-    })
-  }
-
-  render () {
-    return (
-      <div>
-        <canvas id='c' />
-      </div>
-    )
-  }
+  canvas.setBackgroundImage(clientUrl, canvas.renderAll.bind(canvas), {})
+  image.data.forEach(function (c, i) {
+    renderBox(c.coordinates, c.terms, c.width, c.topLeft, canvas)
+  })
+  return (
+    <div>
+      <canvas id='c' />
+    </div>
+  )
 }
 
 export default CanvasComponent
