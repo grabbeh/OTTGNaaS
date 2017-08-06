@@ -1,3 +1,5 @@
+const _ = require('underscore')
+
 exports.getWidth = a => {
   let lowestX = a[0].x
   let highestX = a[0].x
@@ -22,32 +24,20 @@ exports.getTopLeft = a => {
 }
 
 exports.getArea = arr => {
-  let lowX = null
-  let lowY = null
-  let highX = null
-  let highY = null
-  var o = { lowX, lowY, highX, highY }
-  lowX = arr[0].x
-  lowY = arr[0].y
-  for (let coord of arr) {
-    if (coord.x > highX) {
-      o.highX = coord.x
-    }
-    if (coord.y > highY) {
-      o.highY = coord.y
-    }
-    if (coord.x < lowX) {
-      o.lowx = coord.x
-    }
-    if (coord.y < lowY) {
-      o.lowY = coord.y
-    }
-  }
-
-  let width = o.highX - o.lowX
-  let height = o.highY - o.lowY
-  let area = width * height
+  let xs = arr.map(a => {
+    return a.x
+  })
+  let ys = arr.map(a => {
+    return a.y
+  })
+  xs.sort((a, b) => {
+    return a - b
+  })
+  ys.sort((a, b) => {
+    return a - b
+  })
+  const width = _.last(xs) - _.first(xs)
+  const height = _.last(ys) - _.first(ys)
+  const area = width * height
   return area
 }
-
-

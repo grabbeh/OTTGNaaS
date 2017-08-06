@@ -47,29 +47,34 @@ module.exports = async imageData => {
     out.write(chunk)
   })
   let clean = cleanPolys(polys)
-  let high = getHighestCoords(clean)
-  let coordsOfHighest = createCoords(high)
-  let largestArea = helper.getArea(coordsOfHighest)
   let areas = addArea(clean)
-  let filteredBoxes = areas.filter(a => {
-    let acceptableArea = largestArea / 1
-    if (a.area < acceptableArea) return a.area
+  areas
+    .sort((a, b) => {
+      return a.area - b.area
+    })
+    .reverse()
+
+  let largestArea = areas[0].area
+  let acceptableArea = largestArea / 2
+  let filteredAreas = areas.filter(a => {
+    return a.area < acceptableArea
   })
-  let enlargedBoxes = filteredBoxes.map(a => {
-    a.enlargedCoords = increaseArea(__.cloneDeep(a.coords), 5, 7.5)
+  let enlargedBoxes = filteredAreas.map(a => {
+    a.enlargedCoords = increaseArea(__.cloneDeep(a.coords), 5, 2.5)
     return a
   })
   renderBoxes(enlargedBoxes, canvas)
   testIntersection(canvas)
   let boxesWithGroupId = addGroupIds(extractGroupIds(canvas), enlargedBoxes)
-  let speechBubbles = filterBucket(groupForHull(boxesWithGroupId), 8)
+  let speechBubbles = filterBucket(groupForHull(boxesWithGroupId), 1)
   let convexSpeechBubbles = mapXYArrayToXYObject(
     speechBubbles.map(a => {
       return ch(a)
     })
   )
+
   convexSpeechBubbles.forEach(c => {
-    renderBox(c, canvas)
+    renderBox(c, canvas, false)
   })
   return convexSpeechBubbles
 }
@@ -81,7 +86,7 @@ const renderBoxes = (arr, canvas) => {
       top: a.enlargedCoords[0].y,
       stroke: 'white',
       strokeWidth: 1,
-      fill: 'rgba(0,0,0,0)',
+      fill: '',
       id: a.id
     })
 
@@ -90,7 +95,7 @@ const renderBoxes = (arr, canvas) => {
       top: a.coords[0].y,
       stroke: 'red',
       strokeWidth: 1,
-      fill: 'rgba(0,0,0,0)',
+      fill: '',
       id: a.id
     })
     canvas.add(poly)
@@ -100,12 +105,19 @@ const renderBoxes = (arr, canvas) => {
 
 // simple function to render one polygon of {x, y} coordinates
 
-const renderBox = (arr, canvas) => {
+const renderBox = (arr, canvas, content) => {
   let poly = new fabric.Polygon(arr, {
     stroke: 'white',
     strokeWidth: 1,
-    fill: 'white'
+    fill: ''
   })
+  if (content) {
+    let text = new fabric.Text(content, {
+      left: arr[0].x,
+      top: arr[0].y
+    })
+    canvas.add(text)
+  }
   canvas.add(poly)
 }
 
@@ -122,44 +134,6 @@ const cleanPolys = arr => {
       }
     }
   }
-  return arr
-}
-
-// get highest coords so can discard any excessively large areas
-
-const getHighestCoords = arr => {
-  let highestX = 0
-  let highestY = 0
-  let lowestY = null
-  let lowestX = null
-  var o = { highestX, highestY }
-  for (let box of arr) {
-    for (let coord of box.coords) {
-      if (coord.x > highestX) {
-        o.highestX = coord.x
-      }
-      if (coord.y > highestY) {
-        o.highestY = coord.y
-      }
-      if (coord.y < lowestY) {
-        o.lowestY = coord.y
-      }
-      if (coord.x < lowestX) {
-        o.lowestX = coord.x
-      }
-    }
-  }
-  return o
-}
-
-// create coordinates from highest/lowest check above
-
-const createCoords = o => {
-  let arr = []
-  arr[0] = { x: 0, y: 0 }
-  arr[1] = { x: o.highestX, y: 0 }
-  arr[2] = { x: o.highestX, y: o.highestY }
-  arr[3] = { x: 0, y: o.highestY }
   return arr
 }
 
@@ -275,7 +249,7 @@ const mapXYArrayToXYObject = arr => {
 }
 
 // filter groups down on basis that if only X polys, unlikely to be text box (on basis that poly is usually 1 word)
-
+// This is points per polygon so 4 = 1 square
 const filterBucket = (arr, y) => {
   let filteredArray = []
   arr.forEach(n => {

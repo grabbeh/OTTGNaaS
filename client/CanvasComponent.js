@@ -13,26 +13,33 @@ function renderBox (arr, text, width, topLeft, canvas) {
     top: topLeft.y + 5,
     stroke: 'black',
     fontFamily: 'Komikax',
-    fontSize: 7,
+    fontSize: 9,
     width: width - 10
   })
   canvas.add(poly)
   canvas.add(t)
 }
 
-function CanvasComponent ({ image }) {
-  const { height, width, clientUrl } = image.imageData
-  const canvas = new fabric.Canvas('c', { height, width })
+class CanvasComponent extends React.Component {
+  componentDidMount () {
+    const image = this.props.image
+    let { height, width, url } = image.imageData
+    // for testing with static data, url needs to be 'clientUrl'
+    if (image.imageData.clientUrl) url = image.imageData.clientUrl
+    const canvas = new fabric.Canvas('c', { height, width })
+    canvas.setBackgroundImage(url, canvas.renderAll.bind(canvas), {})
+    image.data.forEach(function (c, i) {
+      renderBox(c.coordinates, c.terms, c.width, c.topLeft, canvas)
+    })
+  }
 
-  canvas.setBackgroundImage(clientUrl, canvas.renderAll.bind(canvas), {})
-  image.data.forEach(function (c, i) {
-    renderBox(c.coordinates, c.terms, c.width, c.topLeft, canvas)
-  })
-  return (
-    <div>
-      <canvas id='c' />
-    </div>
-  )
+  render () {
+    return (
+      <div>
+        <canvas id='c' />
+      </div>
+    )
+  }
 }
 
 export default CanvasComponent

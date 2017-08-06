@@ -3,7 +3,7 @@ import CanvasContainer from './CanvasContainer'
 
 class App extends React.Component {
   render () {
-    return <CanvasContainer url={'/data'} />
+    return <CanvasContainer url={'/getImage'} />
   }
 }
 
