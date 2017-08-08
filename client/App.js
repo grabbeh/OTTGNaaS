@@ -1,10 +1,16 @@
 import React from 'react'
 import CanvasContainer from './CanvasContainer'
+import { Provider, PanelHeader, Box } from 'rebass'
 
-class App extends React.Component {
-  render () {
-    return <CanvasContainer url={'/getImage'} />
-  }
-}
+const App = props => (
+  <Provider>
+    <Box p={2}>
+      <PanelHeader>
+        OTTGNaaS
+      </PanelHeader>
+      <CanvasContainer url={'/getImage'} />
+    </Box>
+  </Provider>
+)
 
 export default App

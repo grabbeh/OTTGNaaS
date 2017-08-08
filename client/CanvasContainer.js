@@ -1,6 +1,7 @@
 import React from 'react'
 import axios from 'axios'
 import CanvasComponent from './CanvasComponent'
+import { Box, Label, Button, ButtonOutline, Input } from 'rebass'
 
 class CanvasContainer extends React.Component {
   constructor (props) {
@@ -32,8 +33,8 @@ class CanvasContainer extends React.Component {
     this.setState({ url: event.target.value })
   }
 
-  postUrl () {
-    this.setState({ image: false })
+  postUrl (e) {
+    e.preventDefault()
     console.log('Fn triggered')
     axios
       .post('/postUrl', { url: this.state.url })
@@ -54,24 +55,26 @@ class CanvasContainer extends React.Component {
   render () {
     const { image } = this.state
     return image
-      ? <div>
-        <CanvasComponent image={image} />
-        <div><button onClick={() => this.getCanvas()}>Click me!</button></div>
-
-      </div>
-      : <div>
+      ? <Box>
+        <div>
+          <CanvasComponent image={image} />
+          <div>
+            <Button onClick={() => this.getCanvas()}>Click me!</Button>
+          </div>
+        </div>
+      </Box>
+      : <Box>
         <form onSubmit={this.postUrl}>
-          <label>
-              URL:
-              <input
-                type='text'
-                value={this.state.url}
-                onChange={this.handleChange}
-              />
-          </label>
-          <input type='submit' value='Submit' />
+          <Label p={2}>URL:</Label>
+          <Input
+            w={1 / 2}
+            type='text'
+            value={this.state.url}
+            onChange={this.handleChange}
+            />
+          <ButtonOutline type='submit' children='Submit' />
         </form>
-      </div>
+      </Box>
   }
 }
 
